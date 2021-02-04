@@ -27,11 +27,11 @@ INITIALIZE_ONCE(&DbEvents::StaticInitialize);
 void DbEvents::StaticInitialize()
 {
 	/* Status */
-	Comment::OnCommentAdded.connect([](const Comment::Ptr& comment) { AddComment(comment); });
-	Comment::OnCommentRemoved.connect([](const Comment::Ptr& comment) { RemoveComment(comment); });
-	Downtime::OnDowntimeAdded.connect([](const Downtime::Ptr& downtime) { AddDowntime(downtime); });
-	Downtime::OnDowntimeRemoved.connect([](const Downtime::Ptr& downtime) { RemoveDowntime(downtime); });
-	Downtime::OnDowntimeTriggered.connect([](const Downtime::Ptr& downtime) { TriggerDowntime(downtime); });
+	Comment::OnCommentAdded.connect([](const Comment::Ptr& comment) { DbEvents::AddComment(comment); });
+	Comment::OnCommentRemoved.connect([](const Comment::Ptr& comment) { DbEvents::RemoveComment(comment); });
+	Downtime::OnDowntimeAdded.connect([](const Downtime::Ptr& downtime) { DbEvents::AddDowntime(downtime); });
+	Downtime::OnDowntimeRemoved.connect([](const Downtime::Ptr& downtime) { DbEvents::RemoveDowntime(downtime); });
+	Downtime::OnDowntimeTriggered.connect([](const Downtime::Ptr& downtime) { DbEvents::TriggerDowntime(downtime); });
 	Checkable::OnAcknowledgementSet.connect([](const Checkable::Ptr& checkable, const String&, const String&,
 		AcknowledgementType type, bool, bool, double, double, const MessageOrigin::Ptr&) {
 		DbEvents::AddAcknowledgement(checkable, type);
