@@ -57,14 +57,9 @@ std::vector<String> ConfigPackageUtility::GetPackages()
 	if (!Utility::PathExists(packageDir))
 		return packages;
 
-	Utility::Glob(packageDir + "/*", [&packages](const String& path) { CollectDirNames(path, packages); }, GlobDirectory);
+	Utility::Glob(packageDir + "/*", [&packages](const String& path) { packages.emplace_back(Utility::BaseName(path)); }, GlobDirectory);
 
 	return packages;
-}
-
-void ConfigPackageUtility::CollectDirNames(const String& path, std::vector<String>& dirs)
-{
-	dirs.emplace_back(Utility::BaseName(path));
 }
 
 bool ConfigPackageUtility::PackageExists(const String& name)
@@ -246,7 +241,7 @@ void ConfigPackageUtility::DeleteStage(const String& packageName, const String& 
 std::vector<String> ConfigPackageUtility::GetStages(const String& packageName)
 {
 	std::vector<String> stages;
-	Utility::Glob(GetPackageDir() + "/" + packageName + "/*", [&stages](const String& path) { CollectDirNames(path, stages); }, GlobDirectory);
+	Utility::Glob(GetPackageDir() + "/" + packageName + "/*", [&stages](const String& path) { stages.emplace_back(Utility::BaseName(path)); }, GlobDirectory);
 	return stages;
 }
 

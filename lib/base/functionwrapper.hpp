@@ -11,8 +11,6 @@
 #include <boost/function_types/function_arity.hpp>
 #include <vector>
 
-using namespace std::placeholders;
-
 namespace icinga
 {
 

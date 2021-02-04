@@ -8,12 +8,6 @@
 
 using namespace icinga;
 
-static void InvokeAttributeHandlerHelper(const Function::Ptr& callback,
-	const Object::Ptr& object, const Value& cookie)
-{
-	callback->Invoke({ object });
-}
-
 static void TypeRegisterAttributeHandler(const String& fieldName, const Function::Ptr& callback)
 {
 	ScriptFrame *vframe = ScriptFrame::GetCurrentFrame();
@@ -22,7 +16,7 @@ static void TypeRegisterAttributeHandler(const String& fieldName, const Function
 
 	int fid = self->GetFieldId(fieldName);
 	self->RegisterAttributeHandler(fid, [callback](const Object::Ptr& object, const Value& cookie) {
-		InvokeAttributeHandlerHelper(callback, object, cookie);
+		callback->Invoke({object});
 	});
 }
 

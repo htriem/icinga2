@@ -84,7 +84,7 @@ void IdoPgsqlConnection::Resume()
 
 	m_TxTimer = new Timer();
 	m_TxTimer->SetInterval(1);
-	m_TxTimer->OnTimerExpired.connect([this](const Timer * const&) { TxTimerHandler(); });
+	m_TxTimer->OnTimerExpired.connect([this](const Timer * const&) { NewTransaction(); });
 	m_TxTimer->Start();
 
 	m_ReconnectTimer = new Timer();
@@ -146,11 +146,6 @@ void IdoPgsqlConnection::Disconnect()
 
 	Log(LogInformation, "IdoPgsqlConnection")
 		<< "Disconnected from '" << GetName() << "' database '" << GetDatabase() << "'.";
-}
-
-void IdoPgsqlConnection::TxTimerHandler()
-{
-	NewTransaction();
 }
 
 void IdoPgsqlConnection::NewTransaction()
