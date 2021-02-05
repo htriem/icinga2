@@ -12,6 +12,11 @@ language: cpp
 
 cache: ccache
 
+addons:
+  apt:
+    packages:
+      - rpm
+
 before_script:
   - chmod +x icinga-build-package
   - chmod +x icinga-build-rpm-source
