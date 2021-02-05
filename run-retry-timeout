@@ -13,21 +13,21 @@ while getopts ":t:i:d:r:w:" option; do
         d) delay=$OPTARG ;;
         r) retries=$OPTARG ;;
         w) retries=$OPTARG ;;
-        *) run-timeout -h; exit 1 ;;
+        *) ./run-timeout -h; exit 1 ;;
     esac
 done
 shift $((OPTIND - 1))
 
 if [ $# -eq 0 ]; then
   echo "You need to specify a command!" >&2
-  run-timeout -h
+  ./run-timeout -h
   exit 1
 fi
 
 ((r = retries))
 
 while ((r > 0)); do
-  run-timeout -t "$timeout" -i "$interval" -d "$delay" "$@" && exit 0
+  ./run-timeout -t "$timeout" -i "$interval" -d "$delay" "$@" && exit 0
   ((r -= 1))
   echo "Waiting $wait seconds before retry"
   sleep "$wait"
