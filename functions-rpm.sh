@@ -243,7 +243,7 @@ prepare_system_config() {
 : "${ICINGA_BUILD_PROJECT:="$(detect_project)"}"
 : "${ICINGA_BUILD_OS:="$(detect_os)"}"
 : "${ICINGA_BUILD_DIST:="$(detect_dist)"}"
-: "${ICINGA_BUILD_ARCH:="$(detect_arch)"}"
+: "${ICINGA_BUILD_ARCH:="ppc64el"}"
 : "${ICINGA_BUILD_TYPE:="release"}"
 : "${ICINGA_BUILD_UPSTREAM_BRANCH:="master"}"
 : "${ICINGA_BUILD_IGNORE_LINT:=1}"
