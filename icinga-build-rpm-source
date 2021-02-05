@@ -44,13 +44,13 @@ if [ "$ICINGA_BUILD_TYPE" == "release" ] ; then
   (
     set -ex
     cd "${BUILDDIR}/SOURCES/"
-    run-retry-timeout spectool -g ../SPECS/*.spec
+    ./run-retry-timeout spectool -g ../SPECS/*.spec
   ) || exit 1
 else
   echo "[ Creating snapshot tarball ]"
   (
     set -ex
-    UPSTREAM_GIT_BRANCH="$ICINGA_BUILD_UPSTREAM_BRANCH" run-retry-timeout ./get_snapshot
+    UPSTREAM_GIT_BRANCH="$ICINGA_BUILD_UPSTREAM_BRANCH" ./run-retry-timeout ./get_snapshot
     mv -t "${BUILDDIR}/SOURCES/" ./*.version ./*.tar*
   ) || exit 1
 
