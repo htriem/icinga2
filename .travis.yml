@@ -16,6 +16,7 @@ addons:
   apt:
     packages:
       - rpm
+      - rpmdevtools
 
 before_script:
   - chmod +x icinga-build-package
