@@ -1,0 +1,111 @@
+#!/bin/bash
+
+set -e
+# shellcheck source=functions-rpm.sh
+. "$(dirname "$(readlink -f "$0")")"/functions-rpm.sh
+
+(
+  set -ex
+  rm -rf "${BUILDDIR:?}/"
+) || exit 1
+
+echo "[ git show ]"
+GIT_PAGER='cat' git show -s || true
+echo
+
+echo "[ git status ]"
+GIT_PAGER='cat' git status || true
+echo
+
+(
+  set -ex
+  mkdir "${BUILDDIR}"/{,SPECS,SOURCES,BUILD,SRPMS,RPMS}
+  cp -v ./*.spec "${BUILDDIR}/SPECS/"
+  find . -maxdepth 1 -type f ! -name "*.spec" -exec cp -vt "${BUILDDIR}/SOURCES/" {} \;
+) || exit 1
+
+if [ -d /etc/rpmdevtools ]; then
+  if ! grep -Pq ^--netrc /etc/rpmdevtools/curlrc; then
+    echo "[ Enabling netrc in /etc/rpmdevtools/curlrc ]"
+    echo "--netrc" | sudo tee -a /etc/rpmdevtools/curlrc
+  fi
+
+  if [ -n "$ICINGA_GITLAB_TOKEN" ] && ! grep -qF PRIVATE-TOKEN /etc/rpmdevtools/curlrc; then
+    echo "[ Adding PRIVATE TOKEN to /etc/rpmdevtools/curlrc ]"
+    # NOTE: don't show this to the user!
+    echo "--header \"PRIVATE-TOKEN: xxx\""
+    echo "--header \"PRIVATE-TOKEN: ${ICINGA_GITLAB_TOKEN}\"" | sudo tee -a /etc/rpmdevtools/curlrc >/dev/null
+  fi
+fi # rpmdevtools
+
+# download archive
+if [ "$ICINGA_BUILD_TYPE" == "release" ] ; then
+  echo "[ Downloading current sources with spectool ]"
+  (
+    set -ex
+    cd "${BUILDDIR}/SOURCES/"
+    run-retry-timeout spectool -g ../SPECS/*.spec
+  ) || exit 1
+else
+  echo "[ Creating snapshot tarball ]"
+  (
+    set -ex
+    UPSTREAM_GIT_BRANCH="$ICINGA_BUILD_UPSTREAM_BRANCH" run-retry-timeout ./get_snapshot
+    mv -t "${BUILDDIR}/SOURCES/" ./*.version ./*.tar*
+  ) || exit 1
+
+  echo "[ Building snapshot version ]"
+  (
+    set -ex
+    cd "${BUILDDIR}/"
+
+  	version="$(cut -f1 SOURCES/"${ICINGA_BUILD_PROJECT}.version")"
+  	revision="0.$(date +%Y%m%d.%H%M)"
+  	git_commit="$(cut -f2 SOURCES/"${ICINGA_BUILD_PROJECT}.version")"
+  	tarball="$(cut -f3 SOURCES/"${ICINGA_BUILD_PROJECT}.version")"
+
+  	sed -i \
+  	  -e "0,/^Version: /{s/Version: .*/Version: ${version}/}" \
+  	  -e "0,/^Release: /{s/Release: .*/Release: ${revision}%{?dist}/}" \
+  	  -e '0,/^Source0\?: /{s/\(Source0\?\): .*/Source0: '"${tarball}"'/}' \
+  	  -e '0,/^%global\s\+\(git_\)\?commit /{s/\(%global\s\+\(git_\)\?commit\).*/%global commit '"${git_commit}"'/}' \
+  	   "SPECS/${ICINGA_BUILD_PROJECT}.spec"
+  ) || exit 1
+fi
+
+
+echo "[ Building source RPM ]"
+(
+  set -ex
+  cd "${BUILDDIR}/"
+  rpmbuild --nodeps -bs "SPECS/${ICINGA_BUILD_PROJECT}.spec"
+
+  # TODO: when a package is already releases this might be problems in test
+  # (he could test the package in repository)
+  rpm -qp --queryformat "%{VERSION}-%{RELEASE}" "SRPMS/"*"${ICINGA_BUILD_PROJECT}"*".src.rpm" \
+    >"${ICINGA_BUILD_PROJECT}-package.version"
+) || exit 1
+
+echo "[ Running rpmlint ]"
+lintconf=(--info --verbose -o "NetworkEnabled True")
+if [ -e "rpmlint/${ICINGA_BUILD_PROJECT}.conf" ]; then
+  lintconf+=("-f" "rpmlint/${ICINGA_BUILD_PROJECT}.conf")
+fi
+(
+  if [ -f /etc/os-release ]; then
+    source /etc/os-release
+  fi
+  if [ "$ID" = sles ] && [[ "$VERSION" = 11.* ]]; then
+    echo "Skip rpmlint..."
+    exit 0
+  fi
+  set -o pipefail
+  lintrc=0
+  (set -x; rpmlint "${lintconf[@]}" "${BUILDDIR}/SPECS/${ICINGA_BUILD_PROJECT}.spec") \
+    | tee "${BUILDDIR}/"rpmlint-spec.log || lintrc=$?
+
+  (set -x; rpmlint "${lintconf[@]}" "${BUILDDIR}/SRPMS/"*"${ICINGA_BUILD_PROJECT}"*".src.rpm") \
+    | tee "${BUILDDIR}/"rpmlint-srpm.log || lintrc=$?
+
+  [ "$lintrc" -eq 0 ]
+) || [ "${ICINGA_BUILD_IGNORE_LINT}" -eq 1 ] || exit 1
