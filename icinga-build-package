@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# detecting files
+FILES_SPEC="$(ls ./*.spec 2>/dev/null)"
+FILES_DEBIAN="$(ls -d ./debian ./*/debian 2>/dev/null)"
+
+if [ -n "${FILES_SPEC}" ]; then
+  echo "Detected RPM source: ${FILES_SPEC}"
+  echo
+  echo "[ running source build ]"
+  if ! icinga-build-rpm-source; then
+    echo "[ source build failed! ]"
+    exit 1
+  fi
+  echo "[ source build completed ]"
+  echo
+  echo "[ running binary build ]"
+  if ! icinga-build-rpm-binary; then
+    echo "[ binary build failed! ]"
+    exit 1
+  fi
+  echo "[ binary build completed ]"
+elif [ -n "${FILES_DEBIAN}" ]; then
+  echo "Detected Debian packaging paths: ${FILES_DEBIAN}"
+  echo
+  echo "[ running source build ]"
+  if ! icinga-build-deb-source; then
+    echo "[ source build failed! ]"
+    exit 1
+  fi
+  echo "[ source build completed ]"
+  echo
+
+  echo "[ running binary build ]"
+  if ! icinga-build-deb-binary; then
+    echo "[ binary build failed! ]"
+    exit 1
+  fi
+  echo "[ binary build completed ]"
+else
+  echo "Could not detect build type!" >&2
+  exit 1
+fi
