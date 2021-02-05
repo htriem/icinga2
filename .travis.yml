@@ -1,4 +1,5 @@
 os: linux
+dist: focal
 arch: ppc64le
 
 compiler: gcc
@@ -17,7 +18,7 @@ addons:
       - sourceline: 'deb http://packages.icinga.com/ubuntu icinga-xenial main'
         key_url: 'https://packages.icinga.com/icinga.key'
     packages:
-      - libboost1.67-icinga-all-dev
+      - libboost1.67-dev
       - flex
       - bison
       - libssl-dev
