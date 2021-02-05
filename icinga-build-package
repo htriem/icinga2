@@ -8,14 +8,14 @@ if [ -n "${FILES_SPEC}" ]; then
   echo "Detected RPM source: ${FILES_SPEC}"
   echo
   echo "[ running source build ]"
-  if ! icinga-build-rpm-source; then
+  if ! ./icinga-build-rpm-source; then
     echo "[ source build failed! ]"
     exit 1
   fi
   echo "[ source build completed ]"
   echo
   echo "[ running binary build ]"
-  if ! icinga-build-rpm-binary; then
+  if ! ./icinga-build-rpm-binary; then
     echo "[ binary build failed! ]"
     exit 1
   fi
