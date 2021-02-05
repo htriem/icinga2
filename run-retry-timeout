@@ -1,0 +1,37 @@
+#!/bin/bash
+
+declare -i retries=3
+declare -i timeout=300
+declare -i interval=1
+declare -i delay=1
+declare -i wait=15
+
+while getopts ":t:i:d:r:w:" option; do
+    case "$option" in
+        t) timeout=$OPTARG ;;
+        i) interval=$OPTARG ;;
+        d) delay=$OPTARG ;;
+        r) retries=$OPTARG ;;
+        w) retries=$OPTARG ;;
+        *) run-timeout -h; exit 1 ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -eq 0 ]; then
+  echo "You need to specify a command!" >&2
+  run-timeout -h
+  exit 1
+fi
+
+((r = retries))
+
+while ((r > 0)); do
+  run-timeout -t "$timeout" -i "$interval" -d "$delay" "$@" && exit 0
+  ((r -= 1))
+  echo "Waiting $wait seconds before retry"
+  sleep "$wait"
+done
+
+echo "Command failed on all $retries retries!" >&2
+exit 1
