@@ -12,19 +12,5 @@ language: cpp
 
 cache: ccache
 
-addons:
-  apt:
-    sources:
-      - sourceline: 'deb http://packages.icinga.com/ubuntu icinga-xenial main'
-        key_url: 'https://packages.icinga.com/icinga.key'
-    packages:
-      - libboost1.67-all-dev
-      - flex
-      - bison
-      - libssl-dev
-      - libpq-dev
-      - libmysqlclient-dev
-      - libedit-dev
-
 script:
  - ./icinga-build-package
