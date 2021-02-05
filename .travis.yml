@@ -16,7 +16,7 @@ addons:
   apt:
     packages:
       - rpm
-      - rpmdevtools
+      - obs-build
 
 before_script:
   - chmod +x icinga-build-package
