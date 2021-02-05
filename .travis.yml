@@ -18,7 +18,7 @@ addons:
       - sourceline: 'deb http://packages.icinga.com/ubuntu icinga-xenial main'
         key_url: 'https://packages.icinga.com/icinga.key'
     packages:
-      - libboost1.67-dev
+      - libboost1.67-all-dev
       - flex
       - bison
       - libssl-dev
