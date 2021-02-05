@@ -1,0 +1,8 @@
+os: linux
+arch: ppc64le
+
+compiler: gcc
+
+branches:
+  only:
+  - master
