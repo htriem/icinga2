@@ -23,6 +23,8 @@ before_script:
   - chmod +x functions-rpm.sh 
   - chmod +x functions-common.sh 
   - chmod +x run-retry-timeout
+  - chmod +x run-timeout
+
 
 
 script:
