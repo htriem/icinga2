@@ -44,7 +44,7 @@ if [ "$ICINGA_BUILD_TYPE" == "release" ] ; then
   (
     set -ex
     cd "${BUILDDIR}/SOURCES/"
-    ./run-retry-timeout spectool -g ../SPECS/*.spec
+    ./run-retry-timeout perl spectool.in -g ../SPECS/*.spec
   ) || exit 1
 else
   echo "[ Creating snapshot tarball ]"
